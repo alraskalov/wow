@@ -1,0 +1,24 @@
+{
+  "name": "warcraft-ecosystem",
+  "version": "1.0.0",
+  "private": true,
+  "description": "World of Warcraft projects ecosystem monorepo",
+  "main": "index.js",
+  "workspaces": [
+    "apps/api/*",
+    "apps/api/services/*",
+    "apps/web/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "warcraft",
+    "nestjs",
+    "nextjs",
+    "monorepo"
+  ],
+  "author": "alraskalov",
+  "license": "ISC"
+}
