@@ -1,0 +1,48 @@
+version: '3.8'
+
+# Эта секция определяет сети, которые будут использоваться
+networks:
+  # Наша основная сеть для бэкенд-сервисов
+  backend-network:
+    driver: bridge
+
+# Эта секция определяет тома для персистентного хранения данных
+volumes:
+  user_db_data:
+    driver: local
+  redis_data:
+    driver: local
+
+# Эта секция описывает наши сервисы (контейнеры)
+services:
+  # Сервис для базы данных PostgreSQL
+  user-db:
+    image: postgres:14-alpine
+    container_name: nexus-user-db
+    # Переменные окружения для настройки PostgreSQL
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-admin}
+      POSTGRES_DB: ${POSTGRES_DB:-user_db}
+    # Проброс портов: порт_на_хосте:порт_в_контейнере
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    # Подключение к нашей сети
+    networks:
+      - backend-network
+    # Монтирование тома для хранения данных
+    volumes:
+      - user_db_data:/var/lib/postgresql/data
+    # Политика перезапуска: всегда перезапускать контейнер, если он остановился
+    restart: unless-stopped
+
+  redis:
+    image: redis:6-alpine
+    container_name: nexus-redis
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    networks:
+      - backend-network
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped 
