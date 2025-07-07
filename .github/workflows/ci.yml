@@ -2,7 +2,6 @@
 
 name: CI Пайплайн
 
-# Триггеры для запуска
 on:
   push:
     branches:
@@ -16,36 +15,26 @@ on:
 jobs:
   build-and-test:
     name: Сборка и Тестирование
-    runs-on: ubuntu-latest # Запускаем на последней версии Ubuntu
+    runs-on: ubuntu-latest
 
     steps:
-      # 1. Получаем код из репозитория
       - name: Получение кода
         uses: actions/checkout@v4
 
-      # 2. Настраиваем Node.js, используя версию из .nvmrc
       - name: Установка Node.js
         uses: actions/setup-node@v4
         with:
           node-version-file: '.nvmrc'
-          cache: 'npm' # Кэшируем зависимости npm для ускорения
+          cache: 'npm'
 
-      # 3. Устанавливаем зависимости
       - name: Установка зависимостей
         run: npm install
 
-      # 4. Проверяем форматирование кода
       - name: Проверка форматирования (Prettier)
-        # Мы предполагаем, что у вас будет скрипт "format:check"
-        # Если его нет, можно использовать: npx prettier --check .
         run: npm run format:check --if-present
 
-      # 5. Собираем все приложения и пакеты
       - name: Сборка проекта (Build)
-        # Используем Turborepo для эффективной сборки
         run: npm run build --if-present
 
-      # 6. Запускаем тесты
-      # Этот шаг будет работать, когда мы добавим тесты и скрипт "test"
       - name: Запуск тестов
-        run: npm run test --if-present 
+        run: npm run test --if-present

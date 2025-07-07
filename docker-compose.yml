@@ -24,7 +24,7 @@ services:
       POSTGRES_DB: ${POSTGRES_DB:-user_db}
     # Проброс портов: порт_на_хосте:порт_в_контейнере
     ports:
-      - "${POSTGRES_PORT:-5432}:5432"
+      - '${POSTGRES_PORT:-5432}:5432'
     # Подключение к нашей сети
     networks:
       - backend-network
@@ -38,9 +38,9 @@ services:
     image: redis:6-alpine
     container_name: nexus-redis
     ports:
-      - "${REDIS_PORT:-6379}:6379"
+      - '${REDIS_PORT:-6379}:6379'
     networks:
       - backend-network
     volumes:
       - redis_data:/data
-    restart: unless-stopped 
+    restart: unless-stopped
