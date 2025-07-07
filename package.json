@@ -2,6 +2,7 @@
   "version": "0.0.1",
   "private": true,
   "main": "index.js",
+  "packageManager": "npm@10.8.2",
   "workspaces": [
     "apps/api/*",
     "apps/api/services/*",
@@ -21,8 +22,8 @@
     "typescript": "^5.8.3"
   },
   "lint-staged": {
-    "*.{js,jsx,ts,tsx,json,css,md}": "prettier --write"
+    "*.{js,jsx,ts,tsx,json,scss,css,md}": "prettier --write"
   },
   "keywords": [],
-  "author": "alraskalov"
+  "description": "World of Warcraft projects ecosystem monorepo"
 }
