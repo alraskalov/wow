@@ -1,5 +1,6 @@
 {
-  "version": "0.0.1",
+  "name": "wow-nexus",
+  "version": "1.0.0",
   "private": true,
   "main": "index.js",
   "packageManager": "npm@10.8.2",
@@ -24,6 +25,23 @@
   "lint-staged": {
     "*.{js,jsx,ts,tsx,json,scss,css,md}": "prettier --write"
   },
-  "keywords": [],
+  "keywords": [
+    "warcraft",
+    "wow",
+    "nexus",
+    "nestjs",
+    "nextjs",
+    "monorepo"
+  ],
+  "contributors": [
+    {
+      "name": "Alexander Dolzhenko",
+      "url": "https://github.com/alraskalov"
+    },
+    {
+      "name": "Sergey Kuzovkin",
+      "url": "https://github.com/Dragokas-afk"
+    }
+  ],
   "description": "World of Warcraft projects ecosystem monorepo"
 }
