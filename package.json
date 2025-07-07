@@ -30,8 +30,7 @@
     "wow",
     "nexus",
     "nestjs",
-    "nextjs",
-    "monorepo"
+    "nextjs"
   ],
   "contributors": [
     {
@@ -43,5 +42,5 @@
       "url": "https://github.com/Dragokas-afk"
     }
   ],
-  "description": "World of Warcraft projects ecosystem monorepo"
+  "description": "World of Warcraft projects"
 }
