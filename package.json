@@ -1,8 +1,6 @@
 {
-  "name": "warcraft-ecosystem",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "private": true,
-  "description": "World of Warcraft projects ecosystem monorepo",
   "main": "index.js",
   "workspaces": [
     "apps/api/*",
@@ -11,14 +9,20 @@
     "packages/*"
   ],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prepare": "husky"
   },
-  "keywords": [
-    "warcraft",
-    "nestjs",
-    "nextjs",
-    "monorepo"
-  ],
-  "author": "alraskalov",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "husky": "^9.1.7",
+    "lint-staged": "^16.1.2",
+    "prettier": "^3.6.2",
+    "turborepo": "^0.0.1",
+    "typescript": "^5.8.3"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx,json,css,md}": "prettier --write"
+  },
+  "keywords": [],
+  "author": "alraskalov"
 }

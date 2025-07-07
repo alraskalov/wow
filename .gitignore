@@ -188,7 +188,6 @@ Thumbs.db
 next-env.d.ts
 
 # Prisma
-# Если вы используете Prisma, можно раскомментировать
 # prisma/generated/
 
 # NestJS cache
