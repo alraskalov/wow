@@ -18,11 +18,9 @@ services:
     container_name: warcraft-user-service
     restart: unless-stopped
     environment:
-      # Переменные, которые "впрыскиваются" в контейнер из корневого .env
       DATABASE_URL: ${USER_DB_URL}
       PORT: ${USER_SERVICE_INTERNAL_PORT:-3000}
     ports:
-      # ${USER_SERVICE_EXTERNAL_PORT:-3001}:${USER_SERVICE_INTERNAL_PORT:-3000}
       - '${USER_SERVICE_EXTERNAL_PORT:-3001}:${USER_SERVICE_INTERNAL_PORT:-3000}'
     depends_on:
       - user-db
