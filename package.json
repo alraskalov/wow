@@ -27,7 +27,11 @@
     "typescript": "^5.8.3"
   },
   "lint-staged": {
-    "*.{js,jsx,ts,tsx,json,scss,css,md,yml}": "prettier --write"
+    "*.{js,ts,jsx,tsx}": [
+      "prettier --write",
+      "eslint --fix"
+    ],
+    "*.{json,scss,css,md,yml}": "prettier --write"
   },
   "keywords": [
     "warcraft",

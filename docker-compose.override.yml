@@ -1,0 +1,11 @@
+services:
+  user-service:
+    build:
+      context: .
+      dockerfile: apps/api/services/user-service/Dockerfile
+      target: final-builder
+    working_dir: /app/apps/api/services/user-service
+    command: npx nest start --watch
+    volumes:
+      - .:/app
+      - /app/node_modules

@@ -1,46 +1,56 @@
-# Эта секция определяет сети, которые будут использоваться
+version: '3.8'
+
 networks:
-  # Наша основная сеть для бэкенд-сервисов
-  backend-network:
+  warcraft-network:
     driver: bridge
 
-# Эта секция определяет тома для персистентного хранения данных
 volumes:
-  user_db_data:
+  user-db-data:
     driver: local
-  redis_data:
-    driver: local
+  redis-data:
 
-# Эта секция описывает наши сервисы (контейнеры)
 services:
-  # Сервис для базы данных PostgreSQL
-  user-db:
-    image: postgres:14-alpine
-    container_name: nexus-user-db
-    # Переменные окружения для настройки PostgreSQL
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER:-admin}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-admin}
-      POSTGRES_DB: ${POSTGRES_DB:-user_db}
-    # Проброс портов: порт_на_хосте:порт_в_контейнере
-    ports:
-      - '${POSTGRES_PORT:-5432}:5432'
-    # Подключение к нашей сети
-    networks:
-      - backend-network
-    # Монтирование тома для хранения данных
-    volumes:
-      - user_db_data:/var/lib/postgresql/data
-    # Политика перезапуска: всегда перезапускать контейнер, если он остановился
+  # --- Сервис пользователей ---
+  user-service:
+    build:
+      context: .
+      dockerfile: ./apps/api/services/user-service/Dockerfile
+    container_name: warcraft-user-service
     restart: unless-stopped
+    environment:
+      # Переменные, которые "впрыскиваются" в контейнер из корневого .env
+      DATABASE_URL: ${USER_DB_URL}
+      PORT: ${USER_SERVICE_INTERNAL_PORT:-3000}
+    ports:
+      # ${USER_SERVICE_EXTERNAL_PORT:-3001}:${USER_SERVICE_INTERNAL_PORT:-3000}
+      - '${USER_SERVICE_EXTERNAL_PORT:-3001}:${USER_SERVICE_INTERNAL_PORT:-3000}'
+    depends_on:
+      - user-db
+    networks:
+      - warcraft-network
+
+  # --- База данных для сервиса пользователей ---
+  user-db:
+    image: postgres:16
+    container_name: nexus-user-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${USER_DB_USER}
+      POSTGRES_PASSWORD: ${USER_DB_PASSWORD}
+      POSTGRES_DB: ${USER_DB_NAME}
+    ports:
+      - '${USER_DB_EXTERNAL_PORT}:5432'
+    volumes:
+      - user-db-data:/var/lib/postgresql/data
+    networks:
+      - warcraft-network
 
   redis:
-    image: redis:6-alpine
+    image: redis:alpine
     container_name: nexus-redis
     ports:
-      - '${REDIS_PORT:-6379}:6379'
-    networks:
-      - backend-network
+      - '6379:6379'
     volumes:
-      - redis_data:/data
-    restart: unless-stopped
+      - redis-data:/data
+    networks:
+      - warcraft-network
