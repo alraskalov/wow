@@ -32,8 +32,15 @@ export class UserService {
       this.logger.log(
         `Пользователь с email: ${createUserDto.email} успешно создан`,
       )
-      const { password, ...result } = user
-      return result
+
+      // Возвращаем пользователя без пароля
+      return {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+      }
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2002') {
@@ -46,8 +53,8 @@ export class UserService {
         }
       }
       this.logger.error(
-        `Произошла непредвиденная ошибка при создании пользователя: ${error.message}`,
-        error.stack,
+        `Произошла непредвиденная ошибка при создании пользователя: ${error instanceof Error ? error.message : 'Неизвестная ошибка'}`,
+        error instanceof Error ? error.stack : undefined,
       )
       throw new InternalServerErrorException('Произошла непредвиденная ошибка')
     }

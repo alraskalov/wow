@@ -18,7 +18,8 @@ FROM node:20 AS final-builder
 WORKDIR /app
 COPY --from=builder /app/out/full/ .
 COPY --from=installer /app/node_modules ./node_modules
-RUN npx turbo run build --filter=@wow-nexus/user-service
+WORKDIR /app/apps/api/services/user-service
+RUN npm run build
 
 # Этап 4: Установка только production-зависимостей
 FROM node:20 AS prod-installer
