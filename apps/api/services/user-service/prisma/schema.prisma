@@ -18,3 +18,24 @@ datasource db {
 // ========================================
 
 // Здесь мы будем определять наши модели в будущем
+
+// Enum для ролей пользователей
+enum Role {
+  USER
+  ADMIN
+}
+
+// Модель пользователя
+model User {
+  id        String   @id @default(cuid())
+  username  String   @unique
+  email     String   @unique
+  password  String
+  role      Role     @default(USER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Поля для будущей интеграции с Blizzard
+  blizzardId        Int?    @unique
+  blizzardBattleTag String?
+}
