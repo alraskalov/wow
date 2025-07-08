@@ -140,6 +140,11 @@ node_modules/
 .pnp
 .pnp.js
 
+# Lock files (excluded to allow flexibility in dependency versions)
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
 # Build artifacts
 dist/
 .next/

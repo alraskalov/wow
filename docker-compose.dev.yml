@@ -1,0 +1,55 @@
+# Docker Compose для локальной разработки
+# Запускает только базы данных и внешние сервисы
+# Приложения запускаются локально через npm run dev
+
+version: '3.8'
+
+networks:
+  warcraft-network:
+    driver: bridge
+
+volumes:
+  user-db-data:
+    driver: local
+  redis-data:
+
+services:
+  # --- База данных для сервиса пользователей ---
+  user-db:
+    image: postgres:16
+    container_name: nexus-user-db-dev
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${USER_DB_USER:-nexus_user}
+      POSTGRES_PASSWORD: ${USER_DB_PASSWORD:-nexus_password}
+      POSTGRES_DB: ${USER_DB_NAME:-user_db}
+    ports:
+      - '${USER_DB_EXTERNAL_PORT:-5432}:5432'
+    volumes:
+      - user-db-data:/var/lib/postgresql/data
+    networks:
+      - warcraft-network
+
+  # --- Redis для кэширования ---
+  redis:
+    image: redis:alpine
+    container_name: nexus-redis-dev
+    restart: unless-stopped
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis-data:/data
+    networks:
+      - warcraft-network
+
+  # --- Adminer для управления БД (опционально) ---
+  adminer:
+    image: adminer
+    container_name: nexus-adminer-dev
+    restart: unless-stopped
+    ports:
+      - '8080:8080'
+    networks:
+      - warcraft-network
+    environment:
+      ADMINER_DEFAULT_SERVER: user-db

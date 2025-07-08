@@ -16,7 +16,20 @@
     "test": "turbo run test",
     "format:check": "prettier --check .",
     "format:write": "prettier --write .",
-    "prepare": "husky"
+    "prepare": "husky",
+    "prisma:generate": "turbo run prisma:generate",
+    "prisma:migrate": "turbo run prisma:migrate",
+    "prisma:studio": "turbo run prisma:studio",
+    "db:setup": "turbo run db:setup",
+    "postinstall": "turbo run prisma:generate",
+    "docker:dev:up": "docker-compose -f docker-compose.dev.yml up -d",
+    "docker:dev:down": "docker-compose -f docker-compose.dev.yml down",
+    "docker:dev:logs": "docker-compose -f docker-compose.dev.yml logs -f",
+    "docker:prod:up": "docker-compose up -d",
+    "docker:prod:down": "docker-compose down",
+    "docker:prod:build": "docker-compose up --build -d",
+    "dev:local": "npm run docker:dev:up && npm run db:setup && npm run dev",
+    "dev:docker": "npm run docker:prod:build"
   },
   "license": "ISC",
   "devDependencies": {
@@ -50,5 +63,9 @@
       "url": "https://github.com/Dragokas-afk"
     }
   ],
-  "description": "World of Warcraft projects"
+  "description": "World of Warcraft projects",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  }
 }
