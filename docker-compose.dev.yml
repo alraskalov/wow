@@ -2,8 +2,6 @@
 # Запускает только базы данных и внешние сервисы
 # Приложения запускаются локально через npm run dev
 
-version: '3.8'
-
 networks:
   warcraft-network:
     driver: bridge

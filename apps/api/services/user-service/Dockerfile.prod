@@ -44,8 +44,12 @@ COPY --from=final-builder --chown=node:node /app/apps/api/services/user-service/
 COPY --from=final-builder --chown=node:node /app/apps/api/services/user-service/package.json .
 # Копируем схему Prisma для Prisma Client
 COPY --from=final-builder --chown=node:node /app/apps/api/services/user-service/prisma ./prisma
+# Копируем startup скрипт
+COPY --from=final-builder --chown=node:node /app/apps/api/services/user-service/start.sh ./start.sh
+
+# Делаем скрипт исполняемым
+RUN chmod +x start.sh
 
 USER node
 
-# Для dev режима применяем миграции при запуске и запускаем в watch mode
-CMD ["sh", "-c", "npx prisma migrate deploy && npm run start:dev"] 
+CMD ["./start.sh"] 
