@@ -1,0 +1,30 @@
+# Упрощенный Dockerfile для тестирования
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Установка необходимых пакетов
+RUN apk add --no-cache libc6-compat curl netcat-openbsd
+
+# Копирование package.json файлов
+COPY package*.json ./
+COPY apps/api/services/user-service/package*.json ./apps/api/services/user-service/
+
+# Установка зависимостей
+RUN npm install
+
+# Копирование исходного кода
+COPY . .
+
+# Генерация Prisma Client
+WORKDIR /app/apps/api/services/user-service
+RUN npx prisma generate
+
+# Возврат в корневую директорию
+WORKDIR /app
+
+# Открытие порта
+EXPOSE 3001
+
+# Запуск приложения с inline скриптом
+CMD ["sh", "-c", "echo 'Waiting for database...' && while ! nc -z postgres 5432; do sleep 1; done && echo 'Database is ready!' && cd /app/apps/api/services/user-service && npx prisma migrate deploy && npm run start:dev"] 

@@ -14,12 +14,12 @@ services:
   # --- База данных PostgreSQL ---
   postgres:
     image: postgres:16-alpine
-    container_name: warcraft-postgres
+    container_name: warcraft-postgres-prod
     restart: unless-stopped
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-warcraft}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-warcraft123}
-      POSTGRES_DB: ${POSTGRES_DB:-warcraft_db}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     ports:
       - '${POSTGRES_PORT:-5432}:5432'
     volumes:
@@ -27,15 +27,15 @@ services:
     networks:
       - warcraft-network
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-warcraft}']
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER}']
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   # --- Redis ---
   redis:
     image: redis:7-alpine
-    container_name: warcraft-redis
+    container_name: warcraft-redis-prod
     restart: unless-stopped
     ports:
       - '${REDIS_PORT:-6379}:6379'
@@ -45,27 +45,25 @@ services:
       - warcraft-network
     healthcheck:
       test: ['CMD', 'redis-cli', 'ping']
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   # --- User Service (NestJS) ---
   user-service:
     build:
       context: .
-      dockerfile: ./apps/api/services/user-service/Dockerfile.simple
-    container_name: warcraft-user-service
+      dockerfile: ./apps/api/services/user-service/Dockerfile
+      target: production
+    container_name: warcraft-user-service-prod
     restart: unless-stopped
     environment:
-      NODE_ENV: development
-      DATABASE_URL: postgresql://${POSTGRES_USER:-warcraft}:${POSTGRES_PASSWORD:-warcraft123}@postgres:5432/${POSTGRES_DB:-warcraft_db}
-      REDIS_URL: redis://redis:6379
+      NODE_ENV: production
+      DATABASE_URL: ${DATABASE_URL}
+      REDIS_URL: ${REDIS_URL}
       PORT: ${USER_SERVICE_PORT:-3001}
     ports:
       - '${USER_SERVICE_PORT:-3001}:${USER_SERVICE_PORT:-3001}'
-    volumes:
-      - .:/app
-      - /app/node_modules
     depends_on:
       postgres:
         condition: service_healthy
@@ -73,26 +71,39 @@ services:
         condition: service_healthy
     networks:
       - warcraft-network
-    command: sh -c "echo 'Waiting for database...' && while ! nc -z postgres 5432; do sleep 1; done && echo 'Database is ready!' && cd /app/apps/api/services/user-service && npx prisma migrate deploy && npm run start:dev"
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'curl',
+          '-f',
+          'http://localhost:${USER_SERVICE_PORT:-3001}/health',
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   # --- API Gateway (NestJS) ---
   gateway:
     build:
       context: .
-      dockerfile: ./apps/api/gateway/Dockerfile.simple
-    container_name: warcraft-gateway
+      dockerfile: ./apps/api/gateway/Dockerfile
+      target: production
+    container_name: warcraft-gateway-prod
     restart: unless-stopped
     environment:
-      NODE_ENV: development
+      NODE_ENV: production
       PORT: ${GATEWAY_PORT:-3000}
       USER_SERVICE_URL: http://user-service:${USER_SERVICE_PORT:-3001}
     ports:
       - '${GATEWAY_PORT:-3000}:${GATEWAY_PORT:-3000}'
-    volumes:
-      - .:/app
-      - /app/node_modules
     depends_on:
       - user-service
     networks:
       - warcraft-network
-    command: npm run start:dev --prefix apps/api/gateway
+    healthcheck:
+      test:
+        ['CMD', 'curl', '-f', 'http://localhost:${GATEWAY_PORT:-3000}/health']
+      interval: 30s
+      timeout: 10s
+      retries: 3

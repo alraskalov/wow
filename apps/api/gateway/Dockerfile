@@ -14,7 +14,7 @@ RUN addgroup -g 1001 -S nodejs && \
 # Копирование файлов зависимостей
 COPY package*.json ./
 COPY turbo.json ./
-COPY apps/api/services/user-service/package*.json ./apps/api/services/user-service/
+COPY apps/api/gateway/package*.json ./apps/api/gateway/
 
 # ===========================================
 # Этап установки зависимостей
@@ -26,8 +26,8 @@ RUN npm install -g turbo
 # Копирование всей монорепы
 COPY . .
 
-# Создание "облегченной" версии монорепы для user-service
-RUN turbo prune --scope=@wow-nexus/user-service --docker
+# Создание "облегченной" версии монорепы для gateway
+RUN turbo prune --scope=@wow-nexus/gateway --docker
 
 # Установка зависимостей
 RUN npm install
@@ -46,31 +46,8 @@ COPY --from=deps /app/out/package-lock.json .
 # Копирование исходного кода
 COPY --from=deps /app/out/full/ .
 
-# Установка Prisma CLI
-RUN npm install -g @prisma/client
-
-# Генерация Prisma Client
-WORKDIR /app/apps/api/services/user-service
-RUN npx prisma generate
-
 # Возврат в корневую директорию
 WORKDIR /app
-
-# Создание скрипта для ожидания готовности БД и выполнения миграций
-RUN echo '#!/bin/sh\n\
-echo "Waiting for database..."\n\
-while ! nc -z postgres 5432; do\n\
-  sleep 1\n\
-done\n\
-echo "Database is ready!"\n\
-cd /app/apps/api/services/user-service\n\
-npx prisma migrate deploy\n\
-cd /app/apps/api/services/user-service\n\
-npm run start:dev' > /app/wait-and-start.sh && \
-chmod +x /app/wait-and-start.sh
-
-# Установка netcat для проверки готовности БД
-RUN apk add --no-cache netcat-openbsd
 
 USER nestjs
 
@@ -88,11 +65,8 @@ COPY --from=deps /app/out/package-lock.json .
 # Копирование исходного кода
 COPY --from=deps /app/out/full/ .
 
-# Генерация Prisma Client
-WORKDIR /app/apps/api/services/user-service
-RUN npx prisma generate
-
 # Сборка приложения
+WORKDIR /app/apps/api/gateway
 RUN npm run build
 
 # ===========================================
@@ -113,7 +87,7 @@ FROM node:20-alpine AS production
 WORKDIR /app
 
 # Установка необходимых пакетов
-RUN apk add --no-cache libc6-compat curl netcat-openbsd
+RUN apk add --no-cache libc6-compat curl
 
 # Создание пользователя для безопасности
 RUN addgroup -g 1001 -S nodejs && \
@@ -123,17 +97,13 @@ RUN addgroup -g 1001 -S nodejs && \
 COPY --from=production-deps --chown=nestjs:nodejs /app/node_modules ./node_modules
 
 # Копирование собранного приложения
-COPY --from=builder --chown=nestjs:nodejs /app/apps/api/services/user-service/dist ./dist
-COPY --from=builder --chown=nestjs:nodejs /app/apps/api/services/user-service/package.json ./package.json
-
-# Копирование Prisma схемы и сгенерированного клиента
-COPY --from=builder --chown=nestjs:nodejs /app/apps/api/services/user-service/prisma ./prisma
-COPY --from=builder --chown=nestjs:nodejs /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=builder --chown=nestjs:nodejs /app/apps/api/gateway/dist ./dist
+COPY --from=builder --chown=nestjs:nodejs /app/apps/api/gateway/package.json ./package.json
 
 USER nestjs
 
 # Открытие порта
-EXPOSE 3001
+EXPOSE 3000
 
 # Запуск приложения
 CMD ["npm", "run", "start:prod"] 
