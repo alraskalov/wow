@@ -10,8 +10,6 @@
 - **Redis** (порт 6379) - кеширование
 - **User Service** (порт 3001) - NestJS микросервис для пользователей
 - **API Gateway** (порт 3000) - NestJS шлюз для API
-- **Frontend** (порт 3002) - Next.js приложение
-- **Nginx** (порт 80/443) - reverse proxy (только для продакшена)
 
 ## Порядок запуска
 
@@ -19,8 +17,6 @@
 2. **Redis** - кеширование
 3. **User Service** - микросервис пользователей (с миграциями Prisma)
 4. **API Gateway** - API шлюз
-5. **Frontend** - веб-приложение
-6. **Nginx** - reverse proxy (только продакшен)
 
 ## Переменные окружения
 
@@ -35,7 +31,7 @@ cp .env.example .env
 - `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB` - настройки PostgreSQL
 - `REDIS_URL` - URL для подключения к Redis
 - `DATABASE_URL` - полный URL для подключения к базе данных
-- `USER_SERVICE_PORT`, `GATEWAY_PORT`, `FRONTEND_PORT` - порты сервисов
+- `USER_SERVICE_PORT`, `GATEWAY_PORT` - порты сервисов
 
 ## Команды для разработки
 
@@ -75,7 +71,6 @@ npm run docker:build:prod
 
 ### Разработка
 
-- **Frontend**: http://localhost:3002
 - **API Gateway**: http://localhost:3000
 - **User Service**: http://localhost:3001
 - **PostgreSQL**: localhost:5432
@@ -83,8 +78,8 @@ npm run docker:build:prod
 
 ### Продакшен
 
-- **Frontend**: http://localhost (через Nginx)
-- **API**: http://localhost/api (через Nginx)
+- **API Gateway**: http://localhost:3000
+- **User Service**: http://localhost:3001
 - **PostgreSQL**: localhost:5432
 - **Redis**: localhost:6379
 
@@ -111,7 +106,6 @@ npm run docker:build:prod
 - Использование Turbo для кеширования сборки
 - Объемы для данных PostgreSQL и Redis
 - Hot reload для разработки
-- Standalone режим для Next.js
 
 ## Миграции базы данных
 
