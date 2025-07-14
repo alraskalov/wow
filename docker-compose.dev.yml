@@ -27,7 +27,11 @@ services:
     networks:
       - warcraft-network
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-warcraft}']
+      test:
+        [
+          'CMD-SHELL',
+          'pg_isready -U ${POSTGRES_USER:-warcraft} -d ${POSTGRES_DB:-warcraft_db}',
+        ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -53,7 +57,7 @@ services:
   user-service:
     build:
       context: .
-      dockerfile: ./apps/api/services/user-service/Dockerfile.simple
+      dockerfile: ./apps/api/services/user-service/Dockerfile.dev
     container_name: warcraft-user-service
     restart: unless-stopped
     environment:
@@ -61,6 +65,10 @@ services:
       DATABASE_URL: postgresql://${POSTGRES_USER:-warcraft}:${POSTGRES_PASSWORD:-warcraft123}@postgres:5432/${POSTGRES_DB:-warcraft_db}
       REDIS_URL: redis://redis:6379
       PORT: ${USER_SERVICE_PORT:-3001}
+      CHOKIDAR_USEPOLLING: 'true'
+      WATCHPACK_POLLING: 'true'
+      NODEMON_POLLING: 'true'
+      NODEMON_LEGACY_WATCH: 'false'
     ports:
       - '${USER_SERVICE_PORT:-3001}:${USER_SERVICE_PORT:-3001}'
     volumes:
@@ -79,13 +87,17 @@ services:
   gateway:
     build:
       context: .
-      dockerfile: ./apps/api/gateway/Dockerfile.simple
+      dockerfile: ./apps/api/gateway/Dockerfile.dev
     container_name: warcraft-gateway
     restart: unless-stopped
     environment:
       NODE_ENV: development
       PORT: ${GATEWAY_PORT:-3000}
       USER_SERVICE_URL: http://user-service:${USER_SERVICE_PORT:-3001}
+      CHOKIDAR_USEPOLLING: 'true'
+      WATCHPACK_POLLING: 'true'
+      NODEMON_POLLING: 'true'
+      NODEMON_LEGACY_WATCH: 'false'
     ports:
       - '${GATEWAY_PORT:-3000}:${GATEWAY_PORT:-3000}'
     volumes:

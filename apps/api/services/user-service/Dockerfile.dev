@@ -1,4 +1,4 @@
-# Упрощенный Dockerfile для тестирования
+# Dockerfile для dev режима с hot-reload
 FROM node:20-alpine
 
 WORKDIR /app
@@ -6,15 +6,18 @@ WORKDIR /app
 # Установка необходимых пакетов
 RUN apk add --no-cache libc6-compat curl netcat-openbsd
 
-# Копирование package.json файлов
+# Копирование только package.json файлов для установки зависимостей
 COPY package*.json ./
 COPY apps/api/services/user-service/package*.json ./apps/api/services/user-service/
+
+# Копирование Prisma схемы для генерации клиента
+COPY apps/api/services/user-service/prisma ./apps/api/services/user-service/prisma
 
 # Установка зависимостей
 RUN npm install
 
-# Копирование исходного кода
-COPY . .
+# Установка nodemon глобально для лучшей производительности
+RUN npm install -g nodemon
 
 # Генерация Prisma Client
 WORKDIR /app/apps/api/services/user-service
@@ -26,5 +29,5 @@ WORKDIR /app
 # Открытие порта
 EXPOSE 3001
 
-# Запуск приложения с inline скриптом
+# Запуск приложения в dev режиме
 CMD ["sh", "-c", "echo 'Waiting for database...' && while ! nc -z postgres 5432; do sleep 1; done && echo 'Database is ready!' && cd /app/apps/api/services/user-service && npx prisma migrate deploy && npm run start:dev"] 

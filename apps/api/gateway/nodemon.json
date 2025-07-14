@@ -1,0 +1,17 @@
+{
+  "watch": ["src"],
+  "ext": "ts",
+  "ignore": ["src/**/*.spec.ts", "dist", "node_modules"],
+  "exec": "npm run build && node dist/main.js",
+  "env": {
+    "NODE_ENV": "development"
+  },
+  "delay": 1000,
+  "legacyWatch": false,
+  "polling": true,
+  "pollingInterval": 3000,
+  "events": {
+    "restart": "echo '[nodemon] Restarting due to changes...'",
+    "crash": "echo '[nodemon] App crashed - waiting for file changes before starting...'"
+  }
+}

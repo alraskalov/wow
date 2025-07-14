@@ -105,7 +105,8 @@ npm run docker:build:prod
 
 - Использование Turbo для кеширования сборки
 - Объемы для данных PostgreSQL и Redis
-- Hot reload для разработки
+- Hot reload для разработки с nodemon
+- Polling для Windows + Docker Desktop совместимости
 
 ## Миграции базы данных
 
@@ -131,6 +132,32 @@ npm run docker:dev:logs
 
 # Логи конкретного сервиса
 docker-compose -f docker-compose.dev.yml logs -f user-service
+```
+
+## Hot Reload
+
+### Настройки для Windows + Docker Desktop
+
+Проект настроен для работы с hot-reload на Windows:
+
+```yaml
+# docker-compose.dev.yml
+environment:
+  CHOKIDAR_USEPOLLING: 'true' # Chokidar polling
+  WATCHPACK_POLLING: 'true' # Webpack polling
+  NODEMON_POLLING: 'true' # Nodemon polling
+  NODEMON_LEGACY_WATCH: 'false' # Отключить legacy watch
+```
+
+### Конфигурация nodemon
+
+```json
+// nodemon.json
+{
+  "polling": true,
+  "pollingInterval": 3000,
+  "legacyWatch": false
+}
 ```
 
 ## Troubleshooting
