@@ -3,9 +3,12 @@ import {
   ConflictException,
   Logger,
   InternalServerErrorException,
+  NotFoundException,
+  HttpException,
 } from '@nestjs/common'
 import { PrismaService } from '../prisma/prisma.service'
 import { CreateUserDto } from './dto/create-user.dto'
+import { UserRepository } from './user.repository'
 import * as bcrypt from 'bcrypt'
 import { Prisma } from '@prisma/client'
 
@@ -13,9 +16,12 @@ import { Prisma } from '@prisma/client'
 export class UserService {
   private readonly logger = new Logger(UserService.name)
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly userRepository: UserRepository,
+  ) {}
 
-  async create(createUserDto: CreateUserDto) {
+  public async create(createUserDto: CreateUserDto) {
     this.logger.log(
       `Попытка создания пользователя с email: ${createUserDto.email}`,
     )
@@ -60,7 +66,7 @@ export class UserService {
     }
   }
 
-  async findAll() {
+  public async get() {
     this.logger.log('Запрос на получение всех пользователей')
     return this.prisma.user.findMany({
       select: {
@@ -68,5 +74,42 @@ export class UserService {
         username: true,
       },
     })
+  }
+
+  public async find(id: string) {
+    try {
+      const user = await this.userRepository.find(id)
+      if (!user) {
+        throw new NotFoundException('Пользователь не найден!')
+      }
+      return user
+    } catch (error) {
+      this.logger.warn(error)
+      if (error instanceof HttpException) {
+        throw error
+      }
+
+      throw new InternalServerErrorException('Что-то пошло не так')
+    }
+  }
+
+  public async delete(id: string) {
+    try {
+      const user = await this.userRepository.delete(id)
+      if (!user) {
+        throw new NotFoundException('Пользователь не найден!')
+      }
+
+      return {
+        message: `Пользователь ${user.username} успешно удален!`,
+      }
+    } catch (error) {
+      this.logger.warn(error)
+      if (error instanceof HttpException) {
+        throw error
+      }
+
+      throw new InternalServerErrorException('Что-то пошло не так')
+    }
   }
 }
